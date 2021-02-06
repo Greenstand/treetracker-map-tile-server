@@ -131,12 +131,6 @@ describe("test", () => {
         z: z,
         x: x,
         y: y,
-        datasource: {
-          user: "postgres",
-          host: "172.17.0.3",
-          port: 5432,
-          password: "mysecretpassword",
-        }
       }, options);
 
       if (params.format === 'grid.json') {
