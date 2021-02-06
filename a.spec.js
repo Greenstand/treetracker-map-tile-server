@@ -1,8 +1,8 @@
 var RedisPool = require('redis-mpool');
 const path = require('path');
-var mapnik = require('../Windshaft/node_modules/@carto/mapnik');
+var mapnik = require('@carto/mapnik');
 
-const {factory, model} = require("../Windshaft/lib/index");
+const {factory, model} = require("windshaft");
 
 const config = {
     millstone: {
