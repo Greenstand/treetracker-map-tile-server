@@ -4,6 +4,7 @@ const HttpError = require("./utils/HttpError");
 const {errorHandler} = require("./routes/utils");
 const log = require("loglevel");
 const helper = require("./routes/utils");
+const tileRouter = require("./routes/tile");
 
 const app = express();
 
@@ -12,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-
 app.use(bodyParser.json()); // parse application/json
 
 //routers
-//app.use('/entity', entityRouter);
+app.use('/tile', tileRouter);
 
 //paths
 //app.get('/entity', asyncHandler(async (req, res, next) => {

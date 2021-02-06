@@ -11,4 +11,12 @@ describe("", () => {
     expect(res.statusCode).eq(200);
   });
 
+  it("Test tile:", async () => {
+    const res = await request(server)
+      .get('/tile/1/1/1.grid.json');
+    expect(res.statusCode).eq(200);
+//    console.log(res.body);
+    expect(res.body.grid).a("array");
+  });
+
 });
