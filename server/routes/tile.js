@@ -1,9 +1,26 @@
+require('dotenv').config()
 var RedisPool = require('redis-mpool');
 const path = require('path');
 var mapnik = require('@carto/mapnik');
 const router = require("express").Router();
-
 const {factory, model} = require("windshaft");
+
+//check env
+const list = [
+  "POSTGRES_HOST",
+  "POSTGRES_PORT",
+  "POSTGRES_USER",
+  "POSTGRES_PASSWORD",
+  "POSTGRES_DATABASE",
+]
+list.forEach(variable => {
+  console.log(process.env);
+  if(!process.env[variable]){
+    throw new Error(`Please set up the variable:${variable}`);
+  }
+});
+
+console.log("env:", process.env);
 
 const config = {
     millstone: {
@@ -27,10 +44,10 @@ const config = {
                 datasource: {
                     geometry_field: 'the_geom',
                     srid: 4326,
-                    user: "postgres",
-                    host: "172.17.0.3",
-                    port: 5432,
-                    password: "mysecretpassword",
+                    user: process.env.POSTGRES_USER,
+                    host: process.env.POSTGRES_HOST,
+                    port: process.env.POSTGRES_PORT,
+                    password: process.env.POSTGRES_PASSWORD,
                 },
                 cachedir: '/tmp/windshaft-test/millstone',
                 mapnik_version: mapnik.versions.mapnik
@@ -124,7 +141,7 @@ function getTile(z, x, y, options, callback) {
     options = {};
   }
   var params = Object.assign({
-    dbname: 'postgres',
+    dbname: process.env.POSTGRES_DATABASE,
     layer: 'all',
     format: 'png',
     z: z,
