@@ -1,8 +1,25 @@
+require('dotenv').config()
 var RedisPool = require('redis-mpool');
 const path = require('path');
-var mapnik = require('../Windshaft/node_modules/@carto/mapnik');
+var mapnik = require('@carto/mapnik');
+const router = require("express").Router();
+const {factory, model} = require("windshaft");
 
-const {factory, model} = require("../Windshaft/lib/index");
+//check env
+const list = [
+  "POSTGRES_HOST",
+  "POSTGRES_PORT",
+  "POSTGRES_USER",
+  "POSTGRES_PASSWORD",
+  "POSTGRES_DATABASE",
+]
+list.forEach(variable => {
+  console.log(process.env);
+  if(!process.env[variable]){
+    throw new Error(`Please set up the variable:${variable}`);
+  }
+});
+
 
 const config = {
     millstone: {
@@ -26,10 +43,10 @@ const config = {
                 datasource: {
                     geometry_field: 'the_geom',
                     srid: 4326,
-                    user: "postgres",
-                    host: "172.17.0.3",
-                    port: 5432,
-                    password: "mysecretpassword",
+                    user: process.env.POSTGRES_USER,
+                    host: process.env.POSTGRES_HOST,
+                    port: process.env.POSTGRES_PORT,
+                    password: process.env.POSTGRES_PASSWORD,
                 },
                 cachedir: '/tmp/windshaft-test/millstone',
                 mapnik_version: mapnik.versions.mapnik
@@ -83,69 +100,67 @@ var DEFAULT_POINT_STYLE = [
     '}'
 ].join('');
 
-describe("test", () => {
-
-  it.only("test", function(done){
-    const mapConfig = {
-      version: '1.3.0',
-      layers: [
-        {
-          type: 'mapnik',
-          options: {
-            sql: "SELECT * FROM trees",
-            cartocss: DEFAULT_POINT_STYLE,
-            cartocss_version: '2.3.0',
-            interactivity: "id",
-            attributes: undefined
-          }
-        }
-      ]
-    }
-
-    const redisPool = new RedisPool({
-      host: "172.17.0.3",
-      port: 6379,
-      idleTimeoutMillis: 1,
-      reapIntervalMillis: 1
-    });
-    const configCreated = model.MapConfig.create(mapConfig);
-    const rendererOptions = {
-      grainstore: config.renderer.mapnik.grainstore,
-      renderer: config.renderer.mapnik,
-    }
-
-    const mapClientB = factory({
-      rendererOptions,
-      redisPool,
-      onTileErrorStrategy: (...args) => {console.warn("onTileErrorStrategy!",...args)},
-    });
-    function getTile(z, x, y, options, callback) {
-      if (!callback) {
-        callback = options;
-        options = {};
+const mapConfig = {
+  version: '1.3.0',
+  layers: [
+    {
+      type: 'mapnik',
+      options: {
+        sql: "SELECT * FROM trees",
+        cartocss: DEFAULT_POINT_STYLE,
+        cartocss_version: '2.3.0',
+        interactivity: "id",
+        attributes: undefined
       }
-      var params = Object.assign({
-        dbname: 'postgres',
-        layer: 'all',
-        format: 'png',
-        z: z,
-        x: x,
-        y: y,
-      }, options);
+    }
+  ]
+}
 
-      if (params.format === 'grid.json') {
-        params.token = 'wadus';
-      }
+const redisPool = new RedisPool({
+  host: "172.17.0.3",
+  port: 6379,
+  idleTimeoutMillis: 1,
+  reapIntervalMillis: 1
+});
 
-      var provider = new model.DummyMapConfigProvider(configCreated, params);
-      mapClientB.tileBackend.getTile(provider, params, function (err, tile, headers, stats) {
-        var img;
-        if (!err && tile && params.format === 'png') {
-          img = mapnik.Image.fromBytesSync(Buffer.from(tile, 'binary'));
-        }
-        return callback(err, tile, img, headers, stats);
-      });
-    };
+const configCreated = model.MapConfig.create(mapConfig);
+const rendererOptions = {
+  grainstore: config.renderer.mapnik.grainstore,
+  renderer: config.renderer.mapnik,
+}
+
+const mapClientB = factory({
+  rendererOptions,
+  redisPool,
+  onTileErrorStrategy: (...args) => {console.warn("onTileErrorStrategy!",...args)},
+});
+function getTile(z, x, y, options, callback) {
+  if (!callback) {
+    callback = options;
+    options = {};
+  }
+  var params = Object.assign({
+    dbname: process.env.POSTGRES_DATABASE,
+    layer: 'all',
+    format: 'png',
+    z: z,
+    x: x,
+    y: y,
+  }, options);
+
+  if (params.format === 'grid.json') {
+    params.token = 'wadus';
+  }
+
+  var provider = new model.DummyMapConfigProvider(configCreated, params);
+  mapClientB.tileBackend.getTile(provider, params, function (err, tile, headers, stats) {
+    var img;
+    if (!err && tile && params.format === 'png') {
+      img = mapnik.Image.fromBytesSync(Buffer.from(tile, 'binary'));
+    }
+    return callback(err, tile, img, headers, stats);
+  });
+};
 
 //    getTile(1, 1, 1, (err, tile, img, headers, stats) => {
 //      if(err) console.error("err:", err);
@@ -154,18 +169,11 @@ describe("test", () => {
 //    });
 //    return
 
-    console.log("server...");
-    this.timeout(1000*60*60*24*7);
-    //express server
-    const express = require("express");
-    var cors = require('cors');
-    const app = express();
-    app.use(cors());
-    app.get("/", async (req, res) => {
-      res.send("welcome!");
+    router.get("/", async (req, res) => {
+      res.send("tile api!");
       //        res.status(200);
     });
-    app.get("/:z/:x/:y.png", async (req, res) => {
+    router.get("/:z/:x/:y.png", async (req, res) => {
       const {z,x,y} = req.params;
       console.log("render:",z,x,y);
       const buffer = await new Promise((res, rej) => {
@@ -177,7 +185,7 @@ describe("test", () => {
       res.set({'Content-Type': 'image/png'});
       res.end(buffer);
     });
-    app.get("/:z/:x/:y.grid.json", async (req, res) => {
+    router.get("/:z/:x/:y.grid.json", async (req, res) => {
       const {z,x,y} = req.params;
       console.log("render grid:",z,x,y);
       const json = await new Promise((res, rej) => {
@@ -189,8 +197,5 @@ describe("test", () => {
       res.set({'Content-Type': 'application/json'});
       res.json(json);
     });
-    app.listen(8000, () => {
-      console.log("listening at 8000...");
-    });
-  });
-});
+
+module.exports = router;
