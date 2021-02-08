@@ -5,10 +5,11 @@ const {errorHandler} = require("./routes/utils");
 const log = require("loglevel");
 const helper = require("./routes/utils");
 const tileRouter = require("./routes/tile");
+const cors = require('cors');
 
 const app = express();
 
-
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()); // parse application/json
 
