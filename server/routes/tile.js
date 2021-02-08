@@ -20,7 +20,6 @@ list.forEach(variable => {
   }
 });
 
-console.log("env:", process.env);
 
 const config = {
     millstone: {
