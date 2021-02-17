@@ -41,7 +41,7 @@ const config = {
                     }
                 },
                 datasource: {
-                    geometry_field: 'the_geom',
+                    geometry_field: 'estimated_geometric_location',
                     srid: 4326,
                     user: process.env.POSTGRES_USER,
                     host: process.env.POSTGRES_HOST,
@@ -52,7 +52,7 @@ const config = {
                 mapnik_version: mapnik.versions.mapnik
             },
             mapnik: {
-                geometry_field: 'the_geom',
+                geometry_field: 'estimated_geometric_location',
                 poolSize: 4,
                 poolMaxWaitingClients: 16,
                 metatile: 1,
