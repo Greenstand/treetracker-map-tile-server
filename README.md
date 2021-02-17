@@ -1,3 +1,56 @@
+# Some explanation
+
+The current version is working on the Windshaft library provided by CartoDB, which is based on Mapnik, and using a Node.js binding module called `node-mapnik` to use Mapnik. 
+
+To use enable SSL, needs to build the Mapnik from source code and re-build the node-mapnik against the built Mapnik.
+
+Because build mapnik take times, so build a docker image for convenience.
+
+The whole image size, working-flow could be dramatically streamline in the future.
+
+# How to run it
+
+* Setup the database configure:
+
+Copy the .env.example to .env and set it with correct db connection string.
+
+* Build the image
+
+```
+cd /path/to/project/root
+./scripts/setup.sh
+```
+
+* Run the container
+
+```
+cd /path/to/project/root
+./scripts/up.sh
+```
+
+* Visit the server
+
+http://localhost:8888/viewer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Historical document
+
 # Name of this microservice
    
 Description of this microservice
