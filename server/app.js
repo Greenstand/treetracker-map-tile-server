@@ -6,6 +6,7 @@ const log = require("loglevel");
 const helper = require("./routes/utils");
 const tileRouter = require("./routes/tile");
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
@@ -15,6 +16,14 @@ app.use(bodyParser.json()); // parse application/json
 
 //routers
 app.use('/tile', tileRouter);
+
+
+//viewer
+const viewer = path.join(__dirname, '../examples/viewer');
+app.get('/viewer', function(req, res) {
+    res.sendFile(path.join(viewer, 'index.html'));
+});
+app.use('/viewer', express.static(viewer));
 
 //paths
 //app.get('/entity', asyncHandler(async (req, res, next) => {
