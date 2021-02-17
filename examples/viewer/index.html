@@ -33,7 +33,7 @@
 //		zoomOffset: -1
 	}).addTo(mymap);
 
-  var baseURL_def = "http://142.93.19.234:8000/tile";
+  var baseURL_def = "/tile";
   new L.tileLayer(baseURL_def + '/{z}/{x}/{y}.png').addTo(mymap);
   var utfGridLayer = new L.utfGrid(baseURL_def + '/{z}/{x}/{y}.grid.json');
   utfGridLayer.on('click', function (e) {
