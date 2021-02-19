@@ -1,4 +1,4 @@
-FROM dadiorchen/tileserver:first
+FROM greenstand/treetracker-tile-libraries:first
 
 ENV PATH="/root/.nvm/versions/node/v12.16.3/bin/:${PATH}"
 
