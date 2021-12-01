@@ -17,7 +17,7 @@ spec:
       containers:
       - name: #treetracker-microservice-name#
         image: greenstand/#treetracker-microservice-name#:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
         env:
